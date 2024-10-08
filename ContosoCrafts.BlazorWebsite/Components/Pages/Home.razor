@@ -1,0 +1,38 @@
+﻿@page "/"
+
+@using ContosoCrafts.BlazorWebsite.Infrastructure.Contracts
+@using ContosoCrafts.BlazorWebsite.Infrastructure.Services
+@using ContosoCrafts.BlazorWebsite.Model
+@inject IJsonFileProductService ProductService
+
+@rendermode InteractiveServer
+
+<PageTitle>@PageTitle</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4">Contoso Crafts</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+@if (_selectedProduct != null)
+{
+    <ProductRating SelectedProduct="_selectedProduct" />
+}
+
+<div class="card-columns">
+    @foreach (var product in ProductService.GetProducts())
+    {
+        <ProductCard Product="@product" ProductInfoRatingClicked="ShowProductQuickViewDialog" />
+    }
+</div>
+
+@code{
+    private string PageTitle = "Contoso Crafts";
+
+    private Product? _selectedProduct;
+
+    public void ShowProductQuickViewDialog(Product selectedProduct)
+    {
+        _selectedProduct = selectedProduct;
+    }
+}

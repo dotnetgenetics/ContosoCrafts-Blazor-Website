@@ -1,0 +1,28 @@
+﻿@using ContosoCrafts.BlazorWebsite.Model
+
+@rendermode InteractiveServer
+
+<div class="mb-3 card-container">
+    <div class="card">
+        <div class="card-img" style="background-image: url('@Product.Image')"></div>
+        <div class="card-body">
+            <h5 class="card-title">@Product.Title</h5>
+        </div>
+    </div>
+    <div class="card-footer">
+        <small class="text-muted">
+            <button @onclick="@(async () => await ProductInfoRatingClicked.InvokeAsync(Product))"
+                    class="btn btn-primary">
+                More Info
+            </button>
+        </small>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Product Product { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<Product> ProductInfoRatingClicked { get; set; }
+}

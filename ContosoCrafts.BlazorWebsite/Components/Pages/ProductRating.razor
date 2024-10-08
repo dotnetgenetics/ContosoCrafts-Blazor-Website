@@ -1,0 +1,104 @@
+﻿@using ContosoCrafts.BlazorWebsite.Infrastructure.Services
+@using ContosoCrafts.BlazorWebsite.Infrastructure.Contracts
+@using ContosoCrafts.BlazorWebsite.Model
+@inject IJsonFileProductService ProductService
+
+@rendermode InteractiveServer
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+@if (_selectedProduct != null)
+{
+    <div class="modal fade show d-block" id="exampleModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productTitle">@_selectedProduct.Title</h5>
+                    <button type="button" class="close" @onclick="@Close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-img" style="background-image: url('@_selectedProduct.Image');">
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@_selectedProduct.Description</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @if (voteCount == 0)
+                    {
+                        <span>Be the first to vote!</span>
+                    }
+                    else
+                    {
+                        <span>@voteCount @voteLabel</span>
+                    }
+                    @for (int i = 1; i < 6; i++)
+                    {
+                        var currentStar = i;
+                        if (i <= currentRating)
+                        {
+                            <span class="fa fa-star checked" @onclick="(e => SubmitRating(currentStar))"></span>
+                        }
+                        else
+                        {
+                            <span class="fa fa-star" @onclick="(e => SubmitRating(currentStar))"></span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Product? SelectedProduct { get; set; } = default!;
+    private Product? _selectedProduct;
+    private string selectProductId = string.Empty;
+    private int currentRating = 0;
+    private int voteCount = 0;
+    private string voteLabel = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        _selectedProduct = SelectedProduct;
+        selectProductId = _selectedProduct.Id;
+        GetCurrentRating();
+    }
+
+    void SelectProduct(string productId)
+    {
+        _selectedProduct = ProductService.GetProducts().First(x => x.Id == productId);
+        GetCurrentRating();
+    }
+
+    private void GetCurrentRating()
+    {
+        if (_selectedProduct.Ratings == null)
+        {
+            currentRating = 0;
+            voteCount = 0;
+        }
+        else
+        {
+            voteCount = _selectedProduct.Ratings.Count();
+            voteLabel = voteCount > 1 ? "Votes" : "Vote";
+            currentRating = _selectedProduct.Ratings.Sum() / voteCount;
+        }
+    }
+
+    private void SubmitRating(int rating)
+    {
+        ProductService.AddRating(selectProductId, rating);
+        SelectProduct(selectProductId);
+    }
+
+    public void Close()
+    {
+        _selectedProduct = null;
+    }
+}
